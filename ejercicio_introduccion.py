@@ -34,3 +34,5 @@ def datos():
     return operando1, operando2, operador
 
 datos()
+
+""" traducir el codigo al paradigma poo"""
