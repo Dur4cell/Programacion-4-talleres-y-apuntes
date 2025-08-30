@@ -12,7 +12,7 @@ def division(a, b):
         return a / b
     else:
         return "Error: División por cero"
-
+    
 def operaciones(a, b, op):
     if op == "+":
         return suma(a, b)
