@@ -123,7 +123,7 @@ class menu_bancario:
 if __name__ == "__main__":
     # Cuentas de ejemplo
     cuenta1 = Cuenta_ahorro("Juan Perez", 2000, "123456789")
-    cuenta2 = Cuenta_corriente("Ana", 100, "987654321", sobreGiro_permitido=200)
+    cuenta2 = Cuenta_corriente("Ana", 100, "987654321")
 
     cuentas = {"1": cuenta1, "2": cuenta2}
     print("Bienvenido al sistema bancario")
