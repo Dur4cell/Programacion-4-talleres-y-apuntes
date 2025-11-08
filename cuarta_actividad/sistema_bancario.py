@@ -88,7 +88,6 @@ class Cuenta_corriente(Cuenta_bancaria):
         if cantidad > (saldo_actual + self.get_sobreGiro_permitido()):
             raise SobregiroError("La cantidad excede el sobregiro permitido")
         nuevo = saldo_actual - cantidad
-        return f"Retiro exitoso.\n Nuevo saldo: {nuevo}"
         # permitir saldo negativo (sobregiro)
         self._set_saldo(nuevo)
         return f"Retiro exitoso.\n Nuevo saldo: {nuevo}"
@@ -103,7 +102,26 @@ class menu_bancario:
 1. Depositar
 2. Retirar
 3. Mostrar saldo
-4. Salir"""
+4. Crear nueva cuenta
+5. Salir"""
+
+    @staticmethod
+    def crear_cuenta():
+        print("\nCreación de nueva cuenta:")
+        titular = input("Ingrese nombre del titular: ")
+        saldo = float(input("Ingrese saldo inicial: "))
+        numero_cuenta = input("Ingrese número de cuenta: ")
+        tipo = input("Tipo de cuenta (1: Ahorro, 2: Corriente): ")
+        
+        if tipo == "1":
+            limite = float(input("Ingrese límite de retiro (default 1000): ") or 1000)
+            return Cuenta_ahorro(titular, saldo, numero_cuenta, limite)
+        elif tipo == "2":
+            sobregiro = float(input("Ingrese sobregiro permitido (default 500): ") or 500)
+            return Cuenta_corriente(titular, saldo, numero_cuenta, sobregiro)
+        else:
+            raise ValueError("Tipo de cuenta inválido")
+
     @staticmethod
     def ejecutar_opcion(opcion, cuenta, cantidad=0):
         try:
@@ -114,12 +132,13 @@ class menu_bancario:
             elif opcion == 3:
                 return cuenta.mostrar_saldo()
             elif opcion == 4:
+                return None  # La creación se maneja en el loop principal
+            elif opcion == 5:
                 return "Saliendo del menú bancario."
             else:
                 return "Opción inválida."
         except BancoError as e:
             return f"Error: {e}"
-
 
 if __name__ == "__main__":
     cuenta1 = Cuenta_ahorro("Juan Perez", 2000, "123456789")
@@ -151,9 +170,19 @@ if __name__ == "__main__":
                 print("Entrada inválida. Introduzca un número.")
                 continue
 
-            if opcion == 4:
+            if opcion == 5:
                 print("Volviendo a selección de cuenta.")
                 break
+            
+            if opcion == 4:
+                try:
+                    nueva_cuenta = menu_bancario.crear_cuenta()
+                    nuevo_id = str(len(cuentas) + 1)
+                    cuentas[nuevo_id] = nueva_cuenta
+                    print(f"Cuenta creada exitosamente con ID: {nuevo_id}")
+                except (ValueError, BancoError) as e:
+                    print(f"Error creando cuenta: {e}")
+                continue
 
             cantidad = 0.0
             if opcion in (1, 2):
