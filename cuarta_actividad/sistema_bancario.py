@@ -65,7 +65,7 @@ class Cuenta_ahorro(Cuenta_bancaria):
     def retirar(self, cantidad):
         """Retira una cantidad de la cuenta de ahorro si no excede el límite de retiro"""
         if cantidad > self.get_limite_retiro():
-            raise CantidadInvalidaError("Cantidad excede el límite de retiro")
+            raise CantidadInvalidaError("La cantidad excede el límite de retiro")
         return super().retirar(cantidad)
         
     def depositar(self, cantidad):
@@ -82,10 +82,10 @@ class Cuenta_corriente(Cuenta_bancaria):
     def retirar(self, cantidad):
         """Retira una cantidad de la cuenta corriente si no excede el sobregiro permitido"""
         if cantidad <= 0:
-            raise CantidadInvalidaError("Cantidad inválida para retirar")
+            raise CantidadInvalidaError("La cantidad es inválida para retirar")
         saldo_actual = self.get_saldo()
         if cantidad > (saldo_actual + self.get_sobreGiro_permitido()):
-            raise SobregiroError("Cantidad excede el sobregiro permitido")
+            raise SobregiroError("La cantidad excede el sobregiro permitido")
         nuevo = saldo_actual - cantidad
         # permitir saldo negativo (sobregiro)
         self._set_saldo(nuevo)
@@ -117,22 +117,22 @@ class menu_bancario:
                 return "Opción inválida."
         except BancoError as e:
             return f"Error: {e}"
-    
 
-# Ejemplo de uso
+
 if __name__ == "__main__":
-    # Cuentas de ejemplo
     cuenta1 = Cuenta_ahorro("Juan Perez", 2000, "123456789")
     cuenta2 = Cuenta_corriente("Ana", 100, "987654321")
 
     cuentas = {"1": cuenta1, "2": cuenta2}
-    print("Bienvenido al sistema bancario")
+    print("\n")
+    print("----------Bienvenido al sistema bancario----------")
 
     while True:
         print("\nCuentas disponibles:")
         for k, c in cuentas.items():
-            print(f"{k}. {c.get_titular()} - {c.get_numero_cuenta()} (Saldo: {c.get_saldo()})")
-        sel = input("Seleccione cuenta (o 'q' para salir): ").strip()
+            print(f"{k}. {c.get_titular()} - {c.get_numero_cuenta()}")
+        print("\n")       
+        sel = input("Seleccione cuenta ó ('q' para salir): ").strip()
         if sel.lower() in ("q", "salir", "exit"):
             print("Saliendo.")
             break
