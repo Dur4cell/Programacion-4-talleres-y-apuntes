@@ -37,7 +37,7 @@ class Cuenta_bancaria:
             raise CantidadInvalidaError("Cantidad inválida para depositar")
         nuevo = self.get_saldo() + cantidad
         self._set_saldo(nuevo)
-        return nuevo
+        return f"Depósito exitoso. Nuevo saldo: {nuevo}"
 
     def retirar(self, cantidad):
         """Retira una cantidad de la cuenta bancaria si hay saldo suficiente"""
@@ -48,7 +48,8 @@ class Cuenta_bancaria:
             raise SaldoInsuficienteError("Saldo insuficiente")
         nuevo = saldo_actual - cantidad
         self._set_saldo(nuevo)
-        return nuevo
+        return f"Retiro exitoso.\n Nuevo saldo: {nuevo}"
+
 
     def mostrar_saldo(self):
         """Muestra el saldo actual de la cuenta bancaria"""
@@ -87,9 +88,10 @@ class Cuenta_corriente(Cuenta_bancaria):
         if cantidad > (saldo_actual + self.get_sobreGiro_permitido()):
             raise SobregiroError("La cantidad excede el sobregiro permitido")
         nuevo = saldo_actual - cantidad
+        return f"Retiro exitoso.\n Nuevo saldo: {nuevo}"
         # permitir saldo negativo (sobregiro)
         self._set_saldo(nuevo)
-        return nuevo
+        return f"Retiro exitoso.\n Nuevo saldo: {nuevo}"
         
     def depositar(self, cantidad):
         return super().depositar(cantidad)
@@ -162,4 +164,4 @@ if __name__ == "__main__":
                     continue
 
             resultado = menu_bancario.ejecutar_opcion(opcion, cuenta, cantidad)
-            print("->", resultado)
+            print(resultado)
