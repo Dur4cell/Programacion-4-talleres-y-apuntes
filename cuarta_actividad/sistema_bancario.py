@@ -66,10 +66,16 @@ class Cuenta_ahorro(Cuenta_bancaria):
         """Retira una cantidad de la cuenta de ahorro si no excede el límite de retiro"""
         if cantidad > self.get_limite_retiro():
             raise CantidadInvalidaError("La cantidad excede el límite de retiro")
-        return super().retirar(cantidad)
+        resultado = super().retirar(cantidad)
+        # print similar al método mostrar_saldo
+        print(f"El saldo actual de la cuenta {self.get_numero_cuenta()} es: {self.get_saldo()}")
+        return resultado
         
     def depositar(self, cantidad):
-        return super().depositar(cantidad)
+        resultado = super().depositar(cantidad)
+        # print similar al método mostrar_saldo
+        print(f"El saldo actual de la cuenta {self.get_numero_cuenta()} es: {self.get_saldo()}")
+        return resultado
 
 class Cuenta_corriente(Cuenta_bancaria):
     def __init__(self, titular, saldo, numero_cuenta, sobreGiro_permitido=500):
@@ -89,10 +95,15 @@ class Cuenta_corriente(Cuenta_bancaria):
         nuevo = saldo_actual - cantidad
         # permitir saldo negativo (sobregiro)
         self._set_saldo(nuevo)
+        # print similar al método mostrar_saldo
+        print(f"El saldo actual de la cuenta {self.get_numero_cuenta()} es: {self.get_saldo()}")
         return nuevo
         
     def depositar(self, cantidad):
-        return super().depositar(cantidad)
+        resultado = super().depositar(cantidad)
+        # print similar al método mostrar_saldo
+        print(f"El saldo actual de la cuenta {self.get_numero_cuenta()} es: {self.get_saldo()}")
+        return resultado
     
 class menu_bancario:
     @staticmethod
@@ -162,4 +173,4 @@ if __name__ == "__main__":
                     continue
 
             resultado = menu_bancario.ejecutar_opcion(opcion, cuenta, cantidad)
-            print("->", resultado)
+            
