@@ -51,7 +51,29 @@ class Cuenta_ahorro(Cuenta_bancaria):
             return "Cantidad excede el límite de retiro"
         else:
             return super().retirar(cantidad)
-
+        
+    def depositar(self, cantidad):
+        return super().depositar(cantidad)
 
 cuenta1 = Cuenta_ahorro("Juan Perez", 2000, "123456789")
 print(cuenta1.retirar(900)) 
+
+class Cuenta_corriente(Cuenta_bancaria):
+    def __init__(self, titular, saldo, numero_cuenta, sobreGiro_permitido=500):
+        super().__init__(titular, saldo, numero_cuenta)
+        self.__sobreGiro_permitido = sobreGiro_permitido
+
+    def get_sobreGiro_permitido(self):
+        return self.__sobreGiro_permitido  
+    
+    def retirar(self, cantidad):
+        """Retira una cantidad de la cuenta corriente si no excede el sobregiro permitido"""
+
+        saldo_actual = self.get_saldo()
+        if cantidad > (saldo_actual + self.get_sobreGiro_permitido()):
+            return "SobregiroError: Cantidad excede el sobregiro permitido"
+        else:
+            return super().retirar(cantidad)
+        
+    def depositar(self, cantidad):
+        return super().depositar(cantidad)
