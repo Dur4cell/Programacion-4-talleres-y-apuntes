@@ -1,0 +1,308 @@
+from abc import ABC, abstractmethod
+from datetime import datetime
+
+# ==========================================================
+# ==================== EXCEPCIONES ==========================
+# ==========================================================
+
+class ErrorAutenticacion(Exception):
+    """Error lanzado cuando la autenticación falla."""
+    pass
+
+class ErrorValidacion(Exception):
+    """Error lanzado cuando algún dato no es válido."""
+    pass
+
+# ==========================================================
+# ============= CLASES ABSTRACTAS PRINCIPALES ==============
+# ==========================================================
+
+class Usuario(ABC):
+    """
+    SRP: Representa un usuario del sistema.
+    Principio LSP: Cualquier tipo de usuario debe comportarse como Usuario.
+    """
+
+    def __init__(self, id, nombre, email, password):
+        self.id = id
+        self.nombre = nombre
+        self.email = email
+        self._password = password
+        self.perfil = None  # Composición: un Usuario TIENE un Perfil
+
+    def asignar_perfil(self, perfil):
+        self.perfil = perfil
+
+    def autenticar(self, password):
+        if self._password != password:
+            raise ErrorAutenticacion("Contraseña incorrecta.")
+        return True
+
+    @abstractmethod
+    def ver_perfil(self):
+        pass
+
+
+# ==========================================================
+# ====================== PERFILES ==========================
+# ==========================================================
+
+class Perfil:
+    """
+    Composición: si el usuario se elimina, el perfil también.
+    """
+
+    def __init__(self, id_perfil, nombre_completo, telefono, direccion):
+        self.id_perfil = id_perfil
+        self.nombre_completo = nombre_completo
+        self.telefono = telefono
+        self.direccion = direccion
+
+    def modificar(self, **datos):
+        for clave, valor in datos.items():
+            setattr(self, clave, valor)
+
+    def cambiar_contrasena(self, usuario, actual, nueva):
+        if usuario._password != actual:
+            raise ErrorAutenticacion("La contraseña actual no coincide.")
+        usuario._password = nueva
+
+
+# ==========================================================
+# =================== ADMINISTRADORES ======================
+# ==========================================================
+
+class AdminSI(Usuario):
+    """Administrador general del sistema."""
+
+    def generar_reporte_SI(self):
+        return "Reporte del sistema generado."
+
+    def administrar_categorias(self):
+        pass
+
+    def administrar_capitulos(self):
+        pass
+
+    def administrar_usuarios(self):
+        pass
+
+    def ver_perfil(self):
+        return vars(self.perfil)
+
+
+class AdminCapitulo(Usuario):
+    """Administrador de un capítulo específico."""
+
+    def __init__(self, id, nombre, email, password, id_capitulo):
+        super().__init__(id, nombre, email, password)
+        self.id_capitulo = id_capitulo
+
+    def administrar_capitulo(self):
+        return f"Gestionando capítulo {self.id_capitulo}"
+
+    def asociar_productos_con_municipios(self, producto, municipio):
+        producto.asociarMunicipio(municipio)
+
+    def ver_informacion_capitulo(self):
+        return f"Información del capítulo {self.id_capitulo}"
+
+    def ver_perfil(self):
+        return vars(self.perfil)
+
+
+# ==========================================================
+# ==================== ENTIDADES BASE ======================
+# ==========================================================
+
+class Categoria:
+    """Aplicación del principio SRP: manejar solo lógica de categoría."""
+
+    def __init__(self, id, nombre, descripcion):
+        self.id = id
+        self.nombre = nombre
+        self.descripcion = descripcion
+        self.productos = []  # Agregación (Categoria AGRUPA Productos)
+
+    def crear(self):
+        pass
+
+    def modificar(self, nombre=None, descripcion=None):
+        if nombre:
+            self.nombre = nombre
+        if descripcion:
+            self.descripcion = descripcion
+
+    def eliminar(self):
+        self.productos.clear()
+
+
+class Municipio:
+    def __init__(self, id, nombre):
+        self.id = id
+        self.nombre = nombre
+
+
+class Producto:
+    """Producto puede estar asociado a múltiples municipios."""
+    def __init__(self, id, nombre, descripcion):
+        self.id = id
+        self.nombre = nombre
+        self.descripcion = descripcion
+        self.municipios = []   # Agregación múltiple
+
+    def crear(self):
+        pass
+
+    def modificar(self, nombre=None, descripcion=None):
+        if nombre:
+            self.nombre = nombre
+        if descripcion:
+            self.descripcion = descripcion
+
+    def eliminar(self):
+        self.municipios.clear()
+
+    # Sobrecarga simulada: permite asociar un municipio o lista
+    def asociarMunicipio(self, municipios):
+        if isinstance(municipios, list):
+            self.municipios.extend(municipios)
+        else:
+            self.municipios.append(municipios)
+
+
+class Capitulo:
+    def __init__(self, id, nombre, descripcion):
+        self.id = id
+        self.nombre = nombre
+        self.descripcion = descripcion
+
+    def crear(self):
+        pass
+
+    def modificar(self, **kwargs):
+        for clave, valor in kwargs.items():
+            setattr(self, clave, valor)
+
+    def eliminar(self):
+        pass
+
+
+# ==========================================================
+# ===================== REPORTES ===========================
+# ==========================================================
+
+class Reporte(ABC):
+    """Clase abstracta para garantizar polimorfismo en reportes."""
+    def __init__(self):
+        self.fecha = datetime.now()
+
+    @abstractmethod
+    def generar(self):
+        pass
+
+
+class ReporteSI(Reporte):
+    def generar(self):
+        return f"Reporte del Sistema generado el {self.fecha}"
+
+
+class ReporteCapitulo(Reporte):
+    def generar(self):
+        return f"Reporte del Capítulo generado el {self.fecha}"
+
+
+# ==========================================================
+# ============= FUNCIONALIDADES OPERACIONALES =============
+# ==========================================================
+
+class Autoregistro:
+    """SRP: manejar solo lógica de registro."""
+    def registrar(self, datos_usuario):
+        if not datos_usuario.get("email"):
+            raise ErrorValidacion("El email es obligatorio.")
+        return UsuarioRegistroFactory.crear_usuario(datos_usuario)
+
+
+class Autenticacion:
+    def iniciar_sesion(self, usuario, email, password):
+        if usuario.email != email:
+            raise ErrorAutenticacion("Email incorrecto.")
+        return usuario.autenticar(password)
+
+    def cerrar_sesion(self):
+        return True
+
+
+class RecuperacionDeContrasena:
+    def solicitar_recuperacion(self, email):
+        return f"Correo enviado a {email}"
+
+    def restaurar_contrasena(self, usuario, nueva):
+        usuario._password = nueva
+        return True
+
+
+class IdentificacionDePerfil:
+    def identificar(self, usuario):
+        return usuario.ver_perfil()
+
+
+class FiltrarPorCapitulo:
+    def filtrar(self, usuarios, id_capitulo):
+        return [u for u in usuarios if isinstance(u, AdminCapitulo) and u.id_capitulo == id_capitulo]
+
+
+class AsociarProductosMunicipios:
+    def asociar(self, producto, municipio):
+        producto.asociarMunicipio(municipio)
+
+
+class InformacionDeCapitulo:
+    def modificar_informacion(self, capitulo, datos):
+        capitulo.modificar(**datos)
+
+
+# ==========================================================
+# ============= FACTORY (Patrón + SOLID OCP) ==============
+# ==========================================================
+
+class UsuarioRegistroFactory:
+    """
+    OCP: Abierto para agregar nuevos tipos de usuarios sin modificar el registro.
+    """
+
+    @staticmethod
+    def crear_usuario(datos):
+        tipo = datos.get("tipo", "usuario")
+
+        if tipo == "admin_si":
+            return AdminSI(**datos)
+        elif tipo == "admin_capitulo":
+            return AdminCapitulo(**datos)
+        else:
+            raise ErrorValidacion("Tipo de usuario no reconocido.")
+
+
+# ==========================================================
+# ==================== EJEMPLO DE USO ======================
+# ==========================================================
+
+if __name__ == "__main__":
+
+    # Crear Usuario Admin SI
+    admin_si = AdminSI(1, "Carlos", "admin@si.com", "1234")
+    perfil_admin = Perfil(1, "Carlos López", "3210000000", "Cra 20 #30-14")
+    admin_si.asignar_perfil(perfil_admin)
+
+    # Crear Producto y Municipio
+    producto = Producto(1, "Arroz", "Arroz blanco extra")
+    muni = Municipio(101, "Medellín")
+
+    # Asociar producto <-> municipio
+    producto.asociarMunicipio(muni)
+
+    # Generar reporte
+    reporte = ReporteSI()
+    print(reporte.generar())
+
